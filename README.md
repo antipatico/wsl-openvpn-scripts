@@ -13,7 +13,7 @@ BOTHER ME FIXING MY SCRIPT BECAUSE IT WON'T HAPPEN.
 ## Dependencies
 * OpenVPN for Windows
 * [Stunnel](https://www.stunnel.org/) (Optional)
-* bash
+* bash (version 4 or higher)
 * secure-delete
 * [windows-kill](https://github.com/alirdn/windows-kill)
 
