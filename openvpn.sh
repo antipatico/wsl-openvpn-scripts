@@ -46,6 +46,17 @@ function unix_timestamp {
   date +"%s"
 }
 
+function yes_no_question {
+  shopt -s nocasematch
+  local ANSWER=""
+
+  while ! [[ $ANSWER =~ ^(y(es)?)|(no?)$ ]]; do
+    read -p "$1 (y/n) " ANSWER
+  done
+
+  [ "${ANSWER,,}" == "y" -o "${ANSWER,,}" == "yes" ]
+}
+
 function clear_exit {
   if [ -n "$(openvpn_pid)" ]; then
     # If openvpn is still alive, send CTRL+C
