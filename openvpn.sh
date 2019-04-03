@@ -69,10 +69,10 @@ function clear_exit {
 }
 
 if openvpn_start; then
-  trap clear_exit SIGINT
   touch "$VPN_LOG"
   tail -n 1337 ---disable-inotify -qF "$VPN_LOG" &
   TAIL_PID=$!
+  trap clear_exit SIGINT
 
   wait $TAIL_PID # wait for tail to exit
   if [ -z "$(openvpn_pid)" ]; then
