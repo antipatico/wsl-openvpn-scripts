@@ -46,6 +46,17 @@ function unix_timestamp {
   date +"%s"
 }
 
+function yes_no_question {
+  shopt -s nocasematch
+  local ANSWER=""
+
+  while ! [[ $ANSWER =~ ^(y(es)?)|(no?)$ ]]; do
+    read -p "$1 (y/n) " ANSWER
+  done
+
+  [ "${ANSWER,,}" == "y" -o "${ANSWER,,}" == "yes" ]
+}
+
 function clear_exit {
   if [ -n "$(openvpn_pid)" ]; then
     # If openvpn is still alive, send CTRL+C
@@ -75,7 +86,7 @@ if openvpn_start; then
   trap clear_exit SIGINT
 
   wait $TAIL_PID # wait for tail to exit
-  if [ -z "$(openvpn_pid)" ]; then
+  if [ -z "$(openvpn_pid)" ] && yes_no_question "Do you want to shred the log file?"; then
     srm -v "$VPN_LOG"
   fi
 fi
