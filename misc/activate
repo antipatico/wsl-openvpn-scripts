@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#
+# I'm preserving this script beacuse of the function wrapping (the last line).
+# Wrapping this way is probably a bad idea.
+# This was a really bad setup, please don't mimic it.
+#
+# Author: antipatico (github.com/antipatico)
+# All wrongs reversed 2019
+
+source ./var/venv/bin/activate
+WSLVPN_ROOT="$(pwd)"
+WSLVPN_API_URL="https://APIURL"
+PATH="$PATH:$WSLVPN_ROOT/bin"
+
+# wrap deactivate to unset our custom vars
+eval $(declare -f deactivate | sed '3iunset WSLVPN_ROOT;' | sed '3iunset WSLVPN_API_URL;')
+
