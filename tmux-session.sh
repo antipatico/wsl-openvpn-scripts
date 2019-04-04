@@ -21,9 +21,9 @@ if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
     exit 1
 fi
 
-STUNNEL_CFG=$(echo "$1"|tr -d "'"|sed 's/\\/\\\\\\\\/g')
-OPENVPN_CFG=$(echo "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')
-OPENVPN_LOG="$3"
+STUNNEL_CFG="$(echo -n "$1"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
+OPENVPN_CFG="$(echo -n "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
+OPENVPN_LOG="$(echo -n "$3"|tr -d "'")"
 
 session="wslvpn"
 if (tmux has-session -t "$session" 2>/dev/null); then
@@ -33,9 +33,9 @@ if (tmux has-session -t "$session" 2>/dev/null); then
         tmux attach-session -t "$session"
     fi
 else
-    tmux new-session -d -n "monitor" -s "$session" "watch -n 10 'curl -s https://wtfismyip.com/text'"
+    tmux new-session -d -n "monitor" -s "$session" "watch -n 10 'curl -s https://api.ipify.org/?format=text'"
     tmux split-window -t "wslvpn:monitor" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
-    tmux split-window -t "wslvpn:monitor.1" -h -p 70 "bash -c \"while true; openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read 'Press enter to restart openvpn'; reset; done\""
+    tmux split-window -t "wslvpn:monitor.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
 fi
 
 exit 0
