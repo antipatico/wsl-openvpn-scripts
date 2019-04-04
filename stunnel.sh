@@ -10,7 +10,7 @@
 # Author: antipatico (github.com/antipatico)
 # All wrongs reversed - 2019
 
-[ -z "$1" ] && echo "USAGE: $0 config_file.ssl" && exit 1 
+[ -z "$1" ] && echo "USAGE: $(basename $0) config_file.ssl" && exit 1 
 
 function kill_stunnel {
   taskkill.exe /IM tstunnel.exe /f

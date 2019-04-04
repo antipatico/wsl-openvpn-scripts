@@ -23,7 +23,7 @@ TIMEOUT=15 # time in seconds to wait openvpn to exit before trying to killing it
 #       please mail me a patch.
 VPN_CONFIG=$(echo -n "$1"| tr -d "\"<>/|?*")
 VPN_LOG=$2
-[ -z "$VPN_CONFIG" ] || [ -z "$VPN_LOG" ] && echo "USAGE: $0 config_file.ovpn logfile.log" && exit 1 
+[ -z "$VPN_CONFIG" ] || [ -z "$VPN_LOG" ] && echo "USAGE: $(basename $0) config_file.ovpn logfile.log" && exit 1 
 
 
 function openvpn_pid {

@@ -17,7 +17,7 @@
 # All wrongs reversed - 2019
 
 if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-    echo "USAGE: $0 config.ssl config.ovpn logfile.log"
+    echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
     exit 1
 fi
 
