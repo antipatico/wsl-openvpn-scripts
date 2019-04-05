@@ -25,6 +25,17 @@ STUNNEL_CFG="$(echo -n "$1"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_CFG="$(echo -n "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_LOG="$(echo -n "$3"|tr -d "'")"
 
+function yes_no_question {
+  shopt -s nocasematch
+  local ANSWER=""
+
+  while ! [[ $ANSWER =~ ^(y(es)?)|(no?)$ ]]; do
+    read -p "$1 (y/n) " ANSWER
+  done
+
+  [ "${ANSWER,,}" == "y" -o "${ANSWER,,}" == "yes" ]
+}
+
 session="wslvpn"
 if (tmux has-session -t "$session" 2>/dev/null); then
     echo "Session already $session exists."
