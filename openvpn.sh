@@ -62,7 +62,7 @@ function clear_exit {
     # If openvpn is still alive, send CTRL+C
     openvpn_close
   fi
-  
+
   # Wait for openvpn to exit
   local TIMESTAMP=$(unix_timestamp)
   while [ $((TIMESTAMP-$(unix_timestamp))) -lt $TIMEOUT -a -n "$(openvpn_pid)" ]; do

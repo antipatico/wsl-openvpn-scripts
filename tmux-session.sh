@@ -16,26 +16,48 @@
 # Authors: antipatico (github.com/antipatico)
 # All wrongs reversed - 2019
 
-if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-    echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
-    exit 1
-fi
+SESSION="wslvpn" # TMUX session name
+WINDOW="monitor" # TMUX monitor name
+IPWATCH_TIMEOUT=10 # Time in seconds to wait between each ipwatch request
+IPWATCH_URL="https://api.ipify.org/?format=text"
 
 STUNNEL_CFG="$(echo -n "$1"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_CFG="$(echo -n "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_LOG="$(echo -n "$3"|tr -d "'")"
 
-session="wslvpn"
-if (tmux has-session -t "$session" 2>/dev/null); then
-    echo "Session already $session exists."
-    if [ -z "$TMUX" ]; then
-        echo "Attaching to session $session..."
-        tmux attach-session -t "$session"
-    fi
+if [ -z "$STUNNEL_CFG" -o -z "$OPENVPN_CFG" -o -z "$OPENVPN_LOG" ]; then
+  echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
+  exit 1
+fi
+
+function yes_no_question {
+  shopt -s nocasematch
+  local ANSWER=""
+
+  while ! [[ $ANSWER =~ ^(y(es)?)|(no?)$ ]]; do
+    read -p "$1 (y/n) " ANSWER
+  done
+
+  [ "${ANSWER,,}" == "y" -o "${ANSWER,,}" == "yes" ]
+}
+
+function start_session {
+  tmux new-session -d -n "$WINDOW" -s "$SESSION" "watch -n $IPWATCH_TIMEOUT 'curl -s $IPWATCH_URL'"
+  tmux split-window -t "$SESSION:$WINDOW" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
+  tmux split-window -t "$SESSION:$WINDOW.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
+}
+
+if (tmux has-session -t "$SESSION" 2>/dev/null); then
+  echo "Session $SESSION already exists."
+  if [ -z "$TMUX" ] && yes_no_question "Do you want to attach to it?"; then
+    echo "Attaching to session $SESSION..."
+    tmux attach-session -t "$SESSION"
+  elif (yes_no_question "Do you want to kill it?"); then
+    tmux kill-session -t "$SESSION"
+    start_session
+  fi
 else
-    tmux new-session -d -n "monitor" -s "$session" "watch -n 10 'curl -s https://api.ipify.org/?format=text'"
-    tmux split-window -t "wslvpn:monitor" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
-    tmux split-window -t "wslvpn:monitor.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
+  start_session
 fi
 
 exit 0
