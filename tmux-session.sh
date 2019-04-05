@@ -41,16 +41,23 @@ function yes_no_question {
   [ "${ANSWER,,}" == "y" -o "${ANSWER,,}" == "yes" ]
 }
 
-if (tmux has-session -t "$SESSION" 2>/dev/null); then
-  echo "Session already $SESSION exists."
-  if [ -z "$TMUX" ]; then
-    echo "Attaching to session $SESSION..."
-    tmux attach-session -t "$SESSION"
-  fi
-else
+function start_session {
   tmux new-session -d -n "$WINDOW" -s "$SESSION" "watch -n $IPWATCH_TIMEOUT 'curl -s $IPWATCH_URL'"
   tmux split-window -t "$SESSION:$WINDOW" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
   tmux split-window -t "$SESSION:$WINDOW.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
+}
+
+if (tmux has-session -t "$SESSION" 2>/dev/null); then
+  echo "Session $SESSION already exists."
+  if [ -z "$TMUX" ] && yes_no_question "Do you want to attach to it?"; then
+    echo "Attaching to session $SESSION..."
+    tmux attach-session -t "$SESSION"
+  elif (yes_no_question "Do you want to kill it?"); then
+    tmux kill-session -t "$SESSION"
+    start_session
+  fi
+else
+  start_session
 fi
 
 exit 0
