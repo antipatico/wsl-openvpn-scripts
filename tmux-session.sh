@@ -26,8 +26,8 @@ OPENVPN_CFG="$(echo -n "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_LOG="$(echo -n "$3"|tr -d "'")"
 
 if [ -z "$STUNNEL_CFG" -o -z "$OPENVPN_CFG" -o -z "$OPENVPN_LOG" ]; then
-    echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
-    exit 1
+  echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
+  exit 1
 fi
 
 function yes_no_question {
@@ -42,15 +42,15 @@ function yes_no_question {
 }
 
 if (tmux has-session -t "$SESSION" 2>/dev/null); then
-    echo "Session already $SESSION exists."
-    if [ -z "$TMUX" ]; then
-        echo "Attaching to session $SESSION..."
-        tmux attach-session -t "$SESSION"
-    fi
+  echo "Session already $SESSION exists."
+  if [ -z "$TMUX" ]; then
+    echo "Attaching to session $SESSION..."
+    tmux attach-session -t "$SESSION"
+  fi
 else
-    tmux new-session -d -n "$WINDOW" -s "$SESSION" "watch -n $IPWATCH_TIMEOUT 'curl -s $IPWATCH_URL'"
-    tmux split-window -t "$SESSION:$WINDOW" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
-    tmux split-window -t "$SESSION:$WINDOW.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
+  tmux new-session -d -n "$WINDOW" -s "$SESSION" "watch -n $IPWATCH_TIMEOUT 'curl -s $IPWATCH_URL'"
+  tmux split-window -t "$SESSION:$WINDOW" -v -p 90 "bash -c \"while true; do stunnel.sh '$STUNNEL_CFG'; read -p 'Press enter to restart stunnel'; reset; done\""
+  tmux split-window -t "$SESSION:$WINDOW.1" -v -p 70 "bash -c \"while true; do openvpn.sh '$OPENVPN_CFG' '$OPENVPN_LOG'; read -p 'Press enter to restart openvpn'; reset; done\""
 fi
 
 exit 0
