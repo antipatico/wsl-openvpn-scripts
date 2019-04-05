@@ -16,14 +16,14 @@
 # Authors: antipatico (github.com/antipatico)
 # All wrongs reversed - 2019
 
-if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
-    echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
-    exit 1
-fi
-
 STUNNEL_CFG="$(echo -n "$1"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_CFG="$(echo -n "$2"|tr -d "'"|sed 's/\\/\\\\\\\\/g')"
 OPENVPN_LOG="$(echo -n "$3"|tr -d "'")"
+
+if [ -z "$STUNNEL_CFG" -o -z "$OPENVPN_CFG" -o -z "$OPENVPN_LOG" ]; then
+    echo "USAGE: $(basename $0) config.ssl config.ovpn logfile.log"
+    exit 1
+fi
 
 function yes_no_question {
   shopt -s nocasematch
